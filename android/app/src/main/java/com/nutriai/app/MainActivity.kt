@@ -1014,7 +1014,7 @@ private fun compressForUpload(input: ByteArray): ByteArray {
     val decoded = BitmapFactory.decodeByteArray(input, 0, input.size, options)
         ?: throw IOException("Не удалось обработать изображение.")
     var bitmap = decoded
-    try {
+    return try {
         val exif = try { ExifInterface(ByteArrayInputStream(input)) } catch (_: Exception) { null }
         val degrees = exif?.rotationDegrees?.toFloat() ?: 0f
         val flipped = exif?.isFlipped == true
