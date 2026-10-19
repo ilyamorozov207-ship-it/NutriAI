@@ -1,0 +1,65 @@
+name: NutriAI checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - name: Install backend dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Run backend tests
+        run: pytest -q
+
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses >/dev/null
+      - name: Install Android SDK components
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Run Android unit tests, lint, and compile debug APK
+        run: gradle --no-daemon --stacktrace --warning-mode all -p android testDebugUnitTest lintDebug assembleDebug
+      - name: Verify APK exists and is readable by Android build tools
+        run: |
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          aapt dump badging android/app/build/outputs/apk/debug/app-debug.apk | head -n 5
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nutriai-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload Android build reports if build fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nutriai-android-build-reports
+          path: android/app/build/reports/
+          if-no-files-found: ignore
+          retention-days: 7
