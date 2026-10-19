@@ -1,10 +1,10 @@
-# Как получить APK NutriAI 0.8.0
+# Как получить APK NutriAI 0.9.0 (Stage 10)
 
 ## Вариант 1 — собрать APK через GitHub Actions (без Android SDK на своём ПК)
 
 Workflow устанавливает Java 17, Android SDK Platform 35 и Build Tools 35.0.0, принимает лицензии, запускает backend-тесты, Android unit tests, lint и сборку debug APK, а затем проверяет APK с помощью `aapt`.
 
-1. Распакуй `NutriAI_Stage6.zip`.
+1. Распакуй архив Stage 10.
 2. Создай пустой репозиторий на GitHub.
 3. Загрузи **содержимое папки `nutriai_starter`** в корень репозитория. Обязательно загрузи скрытую папку `.github`.
 4. Открой вкладку **Actions** и выбери workflow **NutriAI checks**.
